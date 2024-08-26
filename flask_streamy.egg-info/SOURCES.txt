@@ -1,0 +1,15 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.cfg
+setup.py
+flask_streamy/__init__.py
+flask_streamy/sse.py
+flask_streamy/stream_manager.py
+flask_streamy.egg-info/PKG-INFO
+flask_streamy.egg-info/SOURCES.txt
+flask_streamy.egg-info/dependency_links.txt
+flask_streamy.egg-info/requires.txt
+flask_streamy.egg-info/top_level.txt
+tests/__init__.py
+tests/test_flask_streamy.py
