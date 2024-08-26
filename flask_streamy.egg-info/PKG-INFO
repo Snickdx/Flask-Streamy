@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: flask-streamy
-Version: 0.1.1
+Version: 0.1.2
 Summary: A Flask package for managing SSE streams.
 Home-page: https://github.com/snickdx/flask-streamy
 Author: Nicholas Mendez
@@ -30,19 +30,23 @@ from flask_streamy import StreamManager
 app = Flask(__name__)
 sse = StreamManager()
 
-@app.route('/send_event/<stream_id>')
-def send_event(stream_id):
-    sse.send_event(stream_id, data="Hello, World!", event_name="greeting")
-    return f"Event sent to stream {stream_id}"
+@app.route('/send_event')
+def send_event():
+    sse.send_event("stream1", data="Hello, World!", event_name="greeting")
+    return "Event sent"
 
-@app.route('/events/<stream_id>')
-def events(stream_id):
-    return sse.get_stream(stream_id)
+@app.route('/stream')
+def events():
+    headers = {
+        "X-Accel-Buffering": "no",  # Disable response buffering
+        "Cache-Control": "no-cache"
+    }
+    return sse.get_stream("stream1", headers=headers)
 
-@app.route('/end_stream/<stream_id>')
-def end_stream(stream_id):
-    sse.end_stream(stream_id)
-    return f"Stream {stream_id} ended"
+@app.route('/end_stream')
+def end_stream():
+    sse.end_stream("stream1")
+    return "Stream ended"
 
 if __name__ == "__main__":
     app.run(debug=True)
@@ -52,15 +56,24 @@ if __name__ == "__main__":
 
 **StreamManager**
 
-* get_stream(stream_id, event_name="message"): Retrieves or creates a stream for the given ID.
-
-* send_event(stream_id, data, event_name=None): Sends an event to the 
-specified stream.
-* end_stream(stream_id): Ends the stream for the given ID.
+*   get_stream(stream_id, event_name="message", headers=None, keep_alive_interval=30):
+    *   Retrieves or creates a stream for the given ID.
+    *   Allows setting custom headers and a keep-alive interval to maintain the connection.
+    *   Automatically sends a Connection: keep-alive header and periodic keep-alive messages.
+*   send_event(stream_id, data, event_name=None):
+    *   Sends an event to the specified stream.
+    *   Automatically handles errors with logging and retry logic.
+*   end_stream(stream_id):
+    *   Ends the stream for the given ID.
+    *   Logs the termination of the stream.
 
 **SSE**
-* add_message(data, event_name=None): Adds a message to the stream.
-* end_stream(): Ends the stream.
+*   Logging:
+    *   Logs key events like stream creation, message addition, and stream termination.
+*   Error Handling with Retries:
+    *   Automatically retries sending events up to a configurable number of times before ending the stream.
+*   Keep-Alive Messages:
+    *   Periodic keep-alive messages are sent to prevent connection timeouts during idle periods.
 
 ## Testing
 
